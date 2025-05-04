@@ -1,0 +1,1 @@
+The combat system is heavily built into the original character movement system so although most of this is not my code the original framework was which was heavily expanded on for the weapon and combat system by my partner.
