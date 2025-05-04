@@ -1,0 +1,42 @@
+using UnityEngine;
+
+public class PlayerAnimation : MonoBehaviour
+{
+    // ---------------------- Variables ----------------------
+    private Animator anim;  // Reference to the Animator component that controls animations
+
+    // ---------------------- Start ----------------------
+    void Start()
+    {
+        // Initialize the Animator component
+        anim = GetComponent<Animator>();
+    }
+
+    // ---------------------- Update Movement Animation ----------------------
+    public void UpdateMovementAnimation(float moveSpeed)
+    {
+        // Update the "Speed" parameter of the Animator to reflect the movement speed of the player
+        anim.SetFloat("Speed", moveSpeed);
+    }
+
+    // ---------------------- Trigger Attack Animation ----------------------
+    public void TriggerAttack()
+    {
+        // Trigger the "Attack" animation when called (useful for melee or action-based attacks)
+        anim.SetTrigger("Attack");
+    }
+
+    // ---------------------- Trigger Shooting Animation ----------------------
+    public void TriggerShoot()
+    {
+        // Trigger the "Shooting" animation when called (useful for ranged attacks)
+        anim.SetTrigger("Shooting");
+    }
+
+    // ---------------------- Trigger Death Animation ----------------------
+    public void TriggerDeath()
+    {
+        // Trigger the "Die" animation when the player dies
+        anim.SetTrigger("Die");
+    }
+}
