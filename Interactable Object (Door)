@@ -1,0 +1,58 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine; 
+using System.Linq;
+public class Door : InteractableObject
+{
+    private bool isOpening = false;
+    private Quaternion targetRotation;
+    private float rotationSpeed = 90f; // degrees per second
+
+    private void Update()
+    {
+        if (isOpening)
+        {
+            // Smoothly rotate toward the target rotation
+            transform.localRotation = Quaternion.RotateTowards(
+                transform.localRotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime
+            );
+
+            // Stop rotating when close enough
+            if (Quaternion.Angle(transform.localRotation, targetRotation) < 0.1f)
+            {
+                isOpening = false;
+            }
+        }
+    }
+
+    public override bool Interact(Interactor interactor)
+    {
+        var playerInventory = interactor.GetComponent<InventoryHolder>().InventorySystem;
+
+        if (HasRequiredItem(playerInventory))
+        {
+            Debug.Log("Opening Door!");
+
+            // Rotate +90 degrees from current Z
+            float newZ = transform.localEulerAngles.z - 100f;
+
+            // Ensure the rotation stays within 0-360
+            if (newZ >= 360f) newZ -= 360f;
+
+            targetRotation = Quaternion.Euler(
+                transform.localEulerAngles.x,
+                transform.localEulerAngles.y,
+                newZ
+            );
+
+            isOpening = true;
+            return true;
+        }
+
+        Debug.Log("You are going to need more bullets!!");
+        return false;
+    }
+}
