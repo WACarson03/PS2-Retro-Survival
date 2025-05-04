@@ -1,0 +1,33 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Unity.Cinemachine;
+
+public class CamSwitcher : MonoBehaviour
+{
+    // ---------------------- Variables ----------------------
+    public Transform Player;              // Reference to the player object (could be used for specific camera positioning if needed)
+    public CinemachineCamera activeCam;   // Reference to the Cinemachine camera that will be switched between
+
+    // ---------------------- On Trigger Enter ----------------------
+    private void OnTriggerEnter(Collider other)
+    {
+        // Check if the object entering the trigger is the player
+        if (other.CompareTag("Player"))
+        {
+            // Set the priority of the camera to 1 when the player enters the trigger zone
+            activeCam.Priority = 1;
+        }
+    }
+
+    // ---------------------- On Trigger Exit ----------------------
+    private void OnTriggerExit(Collider other)
+    {
+        // Check if the object exiting the trigger is the player
+        if (other.CompareTag("Player"))
+        {
+            // Set the priority of the camera back to 0 when the player exits the trigger zone
+            activeCam.Priority = 0;
+        }
+    }
+}
