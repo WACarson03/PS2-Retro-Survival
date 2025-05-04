@@ -1,0 +1,42 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class InteractableObject : MonoBehaviour, IInteractable
+{
+    [SerializeField] private string _interactionPrompt;
+    [SerializeField] private InventoryItemData requiredItem; //required item
+    [SerializeField] private int requiredAmount = 1; //required amount
+
+    public string InteractionPrompt => _interactionPrompt;
+
+    protected bool HasRequiredItem(InventorySystem playerInventory)
+    {
+        var slotsWithItem = playerInventory.InventorySlots.FindAll(slot => slot.ItemData == requiredItem);
+
+        foreach(var slot in slotsWithItem)
+        {
+            if(slot.StackSize >= requiredAmount)  //if player has nuff
+            {
+                return true;
+            }
+        }
+
+        return false; //return flase if not enough
+
+    }
+
+    public virtual bool Interact(Interactor interactor)
+    {
+        var playerInventory = interactor.GetComponent<InventoryHolder>().InventorySystem;
+
+        if(HasRequiredItem(playerInventory))
+        {
+            Debug.Log("Interacting with object");
+            return true;
+        }
+
+        Debug.Log("You don't have the required item");
+        return false;
+    }
+}
