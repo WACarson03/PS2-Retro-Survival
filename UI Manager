@@ -1,0 +1,21 @@
+using UnityEngine;
+using TMPro;
+
+public class UIManager : MonoBehaviour
+{
+    [SerializeField] private TextMeshProUGUI interactionText;  // Reference to the TMP text for interaction prompt
+
+    // Show the interaction text with the given message
+    public void ShowInteractionText(string message)
+    {
+        Debug.Log("Showing interaction text: " + message);  // Debug log
+    interactionText.text = message;
+    interactionText.gameObject.SetActive(true); // Make the text visible
+    }
+
+    // Hide the interaction text
+    public void HideInteractionText()
+    {
+        interactionText.gameObject.SetActive(false);  // Hide the text
+    }
+}
