@@ -1,9 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Linq;
-
 
 [System.Serializable]
 public class InventorySystem
@@ -14,55 +12,111 @@ public class InventorySystem
 
     public UnityAction<InventorySlot> OnInventorySlotChanged;
 
-
+    // Constructor to initialize the inventory with a specified size
     public InventorySystem(int size)
     {
         inventorySlots = new List<InventorySlot>(size);
 
+        // Initialize all slots as empty
         for (int i = 0; i < size; i++)
         {
             inventorySlots.Add(new InventorySlot());
         }
     }
 
+    // Add an item to the inventory, if possible
     public bool AddToInventory(InventoryItemData itemToAdd, int amountToAdd)
     {
-        if (ContainsItem(itemToAdd, out List<InventorySlot> invSlot)) //Check If Item exist in inv
+        // If item already exists, try to add it to existing stack
+        if (ContainsItem(itemToAdd, out List<InventorySlot> invSlot))
         {
             foreach (var slot in invSlot)
             {
-                if(slot.RoomLeftInStack(amountToAdd))
+                // If there's room in the stack, add it
+                if (slot.RoomLeftInStack(amountToAdd))
                 {
                     slot.AddToStack(amountToAdd);
                     OnInventorySlotChanged?.Invoke(slot);
                     return true;
                 }
             }
-            
         }
-        
-        
-        if (HasFreeSlot(out InventorySlot freeSlot)) // Gets first available Slot
+
+        // If no room in the existing stacks, try to find a free slot
+        if (HasFreeSlot(out InventorySlot freeSlot))
         {
             freeSlot.UpdateInventorySlot(itemToAdd, amountToAdd);
             OnInventorySlotChanged?.Invoke(freeSlot);
             return true;
         }
 
-        return false;
-
+        return false; // No room to add item
     }
 
+    // Check if the inventory contains a specific item and return matching slots
     public bool ContainsItem(InventoryItemData itemToAdd, out List<InventorySlot> invSlot)
     {
         invSlot = InventorySlots.Where(i => i.ItemData == itemToAdd).ToList();
-        return invSlot == null ? false : true;
+        return invSlot.Count > 0; // Returns true if any slots are found with the item
     }
 
+    // Overload: Check if the inventory has at least one of the item
+    public bool HasItem(InventoryItemData itemToCheck)
+    {
+        return InventorySlots.Any(i => i.ItemData == itemToCheck);
+    }
 
+    // Overload: Check if the inventory has at least a specific amount of the item
+    public bool HasItem(InventoryItemData itemToCheck, int amount)
+    {
+        int total = 0;
+
+        foreach (var slot in InventorySlots)
+        {
+            if (slot.ItemData == itemToCheck)
+            {
+                total += slot.StackSize;
+                if (total >= amount)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Check if there are any free slots in the inventory
     public bool HasFreeSlot(out InventorySlot freeSlot)
     {
-        freeSlot = InventorySlots.FirstOrDefault(i => i.ItemData == null);
-        return freeSlot == null ? false : true;
+        freeSlot = InventorySlots.FirstOrDefault(i => i.ItemData == null); // Finds the first empty slot
+        return freeSlot != null;
+    }
+
+    // Remove a specific amount of an item from the inventory
+    public bool RemoveItem(InventoryItemData itemToRemove, int amountToRemove)
+    {
+        // Try to find the item in the inventory
+        if (ContainsItem(itemToRemove, out List<InventorySlot> invSlot))
+        {
+            foreach (var slot in invSlot)
+            {
+                if (slot.StackSize >= amountToRemove)
+                {
+                    slot.RemoveFromStack(amountToRemove); // Remove from the stack
+                    OnInventorySlotChanged?.Invoke(slot);
+
+                    // If the stack becomes empty after removal, clear the slot
+                    if (slot.StackSize <= 0)
+                    {
+                        slot.ClearSlot();
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        return false; // Item not found or not enough to remove
     }
 }
+
+
