@@ -1,33 +1,50 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 public class Interactor : MonoBehaviour
 {
     [SerializeField] private Transform _interactionPoint;
     [SerializeField] private float _interactionPointRadius = 0.5f;
     [SerializeField] private LayerMask _interactableMask;
+    [SerializeField] private UIManager uiManager;  // Reference to the UIManager for text feedback
 
     private readonly Collider[] _colliders = new Collider[3];
-    [SerializeField] private int _numFound;
+    private int _numFound;
+    private IInteractable currentInteractable;
 
     private void Update()
     {
-        _numFound = Physics.OverlapSphereNonAlloc(
-            _interactionPoint.position,
-            _interactionPointRadius,
-            _colliders,
-            _interactableMask
-        );
+        // Check for nearby interactable objects
+        _numFound = Physics.OverlapSphereNonAlloc(_interactionPoint.position, _interactionPointRadius, _colliders, _interactableMask);
 
         if (_numFound > 0)
         {
             var interactable = _colliders[0].GetComponent<IInteractable>();
 
-            if (interactable != null && Keyboard.current.eKey.wasPressedThisFrame)
+            if (interactable != null)
             {
-                interactable.Interact(this);
+                // If an interactable object is found, show the interaction prompt
+                if (currentInteractable != interactable)
+                {
+                    uiManager.ShowInteractionText(interactable.InteractionPrompt);  // Show the interaction text
+                    currentInteractable = interactable;  // Set the current interactable
+                }
+
+                // If the player presses the interact button (F), try to interact with the object
+                if (Keyboard.current.eKey.wasPressedThisFrame)
+                {
+                    interactable.Interact(this);  // Handle the interaction
+                    uiManager.HideInteractionText();  // Hide the interaction text after interaction
+                }
+            }
+        }
+        else
+        {
+            // If no interactable object is found, hide the interaction text
+            if (currentInteractable != null)
+            {
+                uiManager.HideInteractionText();
+                currentInteractable = null;
             }
         }
     }
