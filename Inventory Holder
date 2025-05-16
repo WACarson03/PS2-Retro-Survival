@@ -3,21 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-
 [System.Serializable]
 public class InventoryHolder : MonoBehaviour
 {
-    [SerializeField] private int inventorySize;
-    [SerializeField] protected InventorySystem inventorySystem;
+    [SerializeField] private int inventorySize; // Size of the inventory
+    [SerializeField] protected InventorySystem inventorySystem; // The inventory system to manage the inventory
 
-    public InventorySystem InventorySystem => inventorySystem;
+    [SerializeField] private DepositScript depositScript; // Reference to DepositScript
+    [SerializeField] private InventoryDisplay inventoryDisplay; // Reference to InventoryDisplay
+
+    public InventorySystem InventorySystem => inventorySystem; // Read-only access to the InventorySystem
 
     public static UnityAction<InventorySystem> OnDynamicInventoryDisplayRequested;
 
     private void Awake()
     {
+        // Initialize the inventory system with the defined size
         inventorySystem = new InventorySystem(inventorySize);
+
+        //Check if both references are set
+        if (depositScript != null && inventoryDisplay != null)
+        {
+            //Correct: Set the player's inventory system and UI in the DepositScript
+            depositScript.SetPlayerInventory(inventorySystem, inventoryDisplay);
+        }
+        else
+        {
+            Debug.LogError("Missing reference: Please assign DepositScript and InventoryDisplay in the Inspector.");
+        }
     }
-
-
 }
