@@ -1,0 +1,40 @@
+using TMPro;
+using UnityEngine;
+
+public class FlickerScript : MonoBehaviour
+{
+    [SerializeField] private float flickerIntervalMin = 0.05f;
+    [SerializeField] private float flickerIntervalMax = 0.3f;
+
+    [SerializeField] private float fadeSpeed = 10f;
+    [SerializeField] private Color glitchColor = new Color(0f, 1f, 1f, 1f); // cyan-ish glitch
+
+    private TextMeshProUGUI text;
+    private float targetAlpha = 1f;
+    private float currentAlpha = 1f;
+    private float timer;
+
+    void Awake()
+    {
+        text = GetComponent<TextMeshProUGUI>();
+        timer = Random.Range(flickerIntervalMin, flickerIntervalMax);
+    }
+
+    void Update()
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0f)
+        {
+            targetAlpha = Random.value > 0.5f ? 1f : 0.1f; // glitch between visible and faded
+            timer = Random.Range(flickerIntervalMin, flickerIntervalMax);
+        }
+
+        // Smoothly transition alpha
+        currentAlpha = Mathf.MoveTowards(currentAlpha, targetAlpha, fadeSpeed * Time.deltaTime);
+
+        // Apply alpha and glitch color
+        Color newColor = glitchColor;
+        newColor.a = currentAlpha;
+        text.color = newColor;
+    }
+}
